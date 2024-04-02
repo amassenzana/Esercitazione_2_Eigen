@@ -6,7 +6,7 @@ using namespace Eigen;
 
 bool SolvePA(const Matrix2d& A, const Vector2d& b, Vector2d& x, double& cond, double& det, double& errRel);
 bool SolveQR(const Matrix2d& A, const Vector2d& b, Vector2d& x, double& cond, double& det, double& errRel);
-
+double condit(const Matrix2d& A, double& cond, double& det);
 
 
 
@@ -68,13 +68,8 @@ int main()
 
 
 bool SolvePA(const Matrix2d& A, const Vector2d& b, Vector2d& x, double& cond, double& det, double& errRel){
-    JacobiSVD<Matrix2d> svd(A);
-    VectorXd singularValuesA = svd.singularValues();
 
-    cond = singularValuesA.maxCoeff() / singularValuesA.minCoeff();
-    det = A.determinant();
-
-    if( singularValuesA.minCoeff() < 1e-16){
+    if( condit(A, cond, det) < 1e-16){
         std::cout << "Bad Conditioning!  cond = " << cond << std::endl;
         return false;
     }
@@ -91,13 +86,8 @@ bool SolvePA(const Matrix2d& A, const Vector2d& b, Vector2d& x, double& cond, do
 
 
 bool SolveQR(const Matrix2d& A, const Vector2d& b, Vector2d& x, double& cond, double& det, double& errRel){
-    JacobiSVD<Matrix2d> svd(A);
-    VectorXd singularValuesA = svd.singularValues();
 
-    cond = singularValuesA.maxCoeff() / singularValuesA.minCoeff();
-    det = A.determinant();
-
-    if( singularValuesA.minCoeff() < 1e-16){
+    if( condit(A, cond, det) < 1e-16){
         std::cout << "Bad Conditioning!  cond = " << cond << std::endl;
         return false;
     }
@@ -111,4 +101,14 @@ bool SolveQR(const Matrix2d& A, const Vector2d& b, Vector2d& x, double& cond, do
     errRel = (exact - x).norm() / exact.norm();
 
     return true;
+}
+
+double condit(const Matrix2d& A, double& cond, double& det){
+    JacobiSVD<Matrix2d> svd(A);
+    VectorXd singularValuesA = svd.singularValues();
+
+    cond = singularValuesA.maxCoeff() / singularValuesA.minCoeff();
+    det = A.determinant();
+
+    return singularValuesA.minCoeff();
 }
